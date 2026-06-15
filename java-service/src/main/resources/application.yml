@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ac-drainage-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/mall_ac?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+grpc:
+  server:
+    port: 9090
+
+drainage:
+  control:
+    warning-level-mm: 60.0
+    danger-level-mm: 100.0
+    overflow-level-mm: 140.0
+    min-speed-percent: 10
+    max-speed-percent: 100
+    slope-window-seconds: 60
+    slope-sample-count: 10

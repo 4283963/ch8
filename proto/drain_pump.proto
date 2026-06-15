@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package drainage;
+
+option java_multiple_files = true;
+option java_package = "com.mall.ac.grpc.api";
+option java_outer_classname = "DrainPumpProto";
+option go_package = "./drainage";
+
+message DeviceInfo {
+    string device_id = 1;
+    string location = 2;
+}
+
+message LevelData {
+    string device_id = 1;
+    double liquid_level_mm = 2;
+    int64 timestamp_ms = 3;
+    int32 sensor_status = 4;
+}
+
+message PumpControl {
+    string device_id = 1;
+    int32 speed_percent = 2;
+    int64 timestamp_ms = 3;
+    string reason = 4;
+}
+
+message ControlAck {
+    string device_id = 1;
+    bool success = 2;
+    int32 actual_speed_percent = 3;
+    int64 timestamp_ms = 4;
+    string message = 5;
+}
+
+message GatewayHello {
+    string gateway_id = 1;
+    repeated DeviceInfo devices = 2;
+    int64 timestamp_ms = 3;
+}
+
+service DrainPumpService {
+    rpc StreamControl (stream LevelData) returns (stream PumpControl);
+    rpc SendAck (ControlAck) returns (ControlAck);
+    rpc RegisterGateway (GatewayHello) returns (GatewayHello);
+}
