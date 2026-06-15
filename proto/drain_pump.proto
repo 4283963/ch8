@@ -34,6 +34,13 @@ message ControlAck {
     string message = 5;
 }
 
+message BatchLevelData {
+    string gateway_id = 1;
+    int64 batch_timestamp_ms = 2;
+    repeated LevelData items = 3;
+    int32 dropped_count = 4;
+}
+
 message GatewayHello {
     string gateway_id = 1;
     repeated DeviceInfo devices = 2;
@@ -42,6 +49,7 @@ message GatewayHello {
 
 service DrainPumpService {
     rpc StreamControl (stream LevelData) returns (stream PumpControl);
+    rpc StreamBatchControl (stream BatchLevelData) returns (stream PumpControl);
     rpc SendAck (ControlAck) returns (ControlAck);
     rpc RegisterGateway (GatewayHello) returns (GatewayHello);
 }
