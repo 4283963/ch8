@@ -34,3 +34,7 @@ drainage:
     max-speed-percent: 100
     slope-window-seconds: 60
     slope-sample-count: 10
+    business-start-hour: 10
+    business-end-hour: 22
+    business-max-speed-percent: 50
+    emergency-level-ratio: 0.9

@@ -1,11 +1,13 @@
 package com.mall.ac.service;
 
+import com.mall.ac.algorithm.PumpSpeedController;
 import com.mall.ac.config.DrainageProperties;
 import com.mall.ac.entity.AcDevice;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,8 +19,9 @@ import java.util.*;
 @RequiredArgsConstructor
 public class SystemMonitorService {
 
-    private final AsyncBatchProcessor asyncProcessor;
+    @Lazy private final AsyncBatchProcessor asyncProcessor;
     private final DrainageProperties props;
+    private final PumpSpeedController speedController;
 
     private static final double RING_HIGH_WATERMARK = 0.85;
     private static final double RING_CRITICAL_WATERMARK = 0.97;
@@ -173,13 +176,23 @@ public class SystemMonitorService {
             }
         }
 
+        PumpSpeedController.BusinessPhase phase =
+                speedController.resolveBusinessPhase(0.0);
+        String phaseLabel = switch (phase) {
+            case BUSINESS_HOURS -> "🤫 BUSINESS (noise-limit @" + props.getBusinessMaxSpeedPercent() + "%)";
+            case AFTER_HOURS -> "🌙 AFTER-HOURS (full-power @" + props.getMaxSpeedPercent() + "%)";
+            case EMERGENCY_OVERRIDE -> "🚨 EMERGENCY OVERRIDE";
+        };
+
         log.info("""
             ┌───────── 1min STATUS SUMMARY ─────────┐
+            Phase: {}
             Ring: {}/{} ({}) | recv={} proc={} written={} dropped={}
             Devices: {} total | {} pumps active | max={:.1f}mm ({})
             Status: {}
             └───────────────────────────────────────┘
             """.formatted(
+                phaseLabel,
                 stats.get("ringSize"), stats.get("ringCapacity"), stats.get("ringUsagePct"),
                 stats.get("totalReceived"), stats.get("totalProcessed"),
                 stats.get("totalWrittenDb"), stats.get("totalDropped"),

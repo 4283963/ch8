@@ -2,6 +2,7 @@ package com.mall.ac.controller;
 
 import com.mall.ac.algorithm.LevelSlopeCalculator;
 import com.mall.ac.algorithm.PumpSpeedController;
+import com.mall.ac.config.DrainageProperties;
 import com.mall.ac.dto.ApiResponse;
 import com.mall.ac.dto.DeviceStatusDTO;
 import com.mall.ac.dto.ManualControlRequest;
@@ -25,6 +26,8 @@ public class DrainageController {
     private final DrainageService drainageService;
     private final AsyncBatchProcessor asyncProcessor;
     private final LevelSlopeCalculator slopeCalculator;
+    private final PumpSpeedController speedController;
+    private final DrainageProperties props;
 
     @GetMapping("/devices")
     public ApiResponse<List<DeviceStatusDTO>> getAllDevices() {
@@ -113,6 +116,20 @@ public class DrainageController {
         stats.put("avgLevelMm", all.isEmpty() ? 0 : String.format("%.2f", totalLevel / all.size()));
         stats.put("statusBreakdown", statusCounts);
 
+        PumpSpeedController.BusinessPhase nowPhase =
+                speedController.resolveBusinessPhase(0.0);
+        stats.put("businessPhase", nowPhase.name());
+        stats.put("businessHours",
+                String.format("%02d:00 - %02d:00",
+                        props.getBusinessStartHour(), props.getBusinessEndHour()));
+        stats.put("noiseLimited", nowPhase == PumpSpeedController.BusinessPhase.BUSINESS_HOURS);
+        stats.put("effectiveMaxSpeedPercent",
+                nowPhase == PumpSpeedController.BusinessPhase.BUSINESS_HOURS
+                        ? props.getBusinessMaxSpeedPercent()
+                        : props.getMaxSpeedPercent());
+        stats.put("emergencyLineMm", String.format("%.1f",
+                props.getOverflowLevelMm() * props.getEmergencyLevelRatio()));
+
         return ApiResponse.success(stats);
     }
 
@@ -128,6 +145,15 @@ public class DrainageController {
 
         LevelSlopeCalculator.SlopeResult slope = slopeCalculator.calculateSlopeFromDb(d.getDeviceId());
         dto.setLevelSlope(slope.slopeMmPerSec);
+
+        PumpSpeedController.BusinessPhase phase =
+                speedController.resolveBusinessPhase(d.getCurrentLevelMm() != null ? d.getCurrentLevelMm() : 0.0);
+        dto.setBusinessPhase(phase.name());
+        dto.setNoiseLimited(phase == PumpSpeedController.BusinessPhase.BUSINESS_HOURS);
+        dto.setEffectiveMaxSpeed(
+                phase == PumpSpeedController.BusinessPhase.BUSINESS_HOURS
+                        ? props.getBusinessMaxSpeedPercent()
+                        : props.getMaxSpeedPercent());
         return dto;
     }
 }

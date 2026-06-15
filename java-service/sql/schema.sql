@@ -40,9 +40,12 @@ CREATE TABLE level_history (
     pump_speed_percent INT          NOT NULL DEFAULT 0 COMMENT '控制的水泵转速百分比',
     control_reason  VARCHAR(256)    DEFAULT NULL COMMENT '控制决策说明',
     sensor_status   INT             NOT NULL DEFAULT 0 COMMENT '传感器状态码：0正常',
+    business_phase  VARCHAR(32)     DEFAULT NULL COMMENT '营业阶段：BUSINESS_HOURS/AFTER_HOURS/EMERGENCY_OVERRIDE',
+    noise_limited   TINYINT(1)      DEFAULT NULL COMMENT '是否处于营业噪音限制模式',
     record_time     DATETIME        NOT NULL COMMENT '采样时间',
     KEY idx_device_time (device_id, record_time),
-    KEY idx_record_time (record_time)
+    KEY idx_record_time (record_time),
+    KEY idx_business_phase (business_phase)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='液位历史记录表';
 
 -- ============================================================

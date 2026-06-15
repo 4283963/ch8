@@ -13,4 +13,7 @@ public class DeviceStatusDTO {
     private String status;
     private Double levelSlope;
     private LocalDateTime lastUpdateTime;
+    private String businessPhase;
+    private Integer effectiveMaxSpeed;
+    private Boolean noiseLimited;
 }

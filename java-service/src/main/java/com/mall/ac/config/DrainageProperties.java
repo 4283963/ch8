@@ -15,4 +15,9 @@ public class DrainageProperties {
     private Integer maxSpeedPercent = 100;
     private Integer slopeWindowSeconds = 60;
     private Integer slopeSampleCount = 10;
+
+    private Integer businessStartHour = 10;
+    private Integer businessEndHour = 22;
+    private Integer businessMaxSpeedPercent = 50;
+    private Double emergencyLevelRatio = 0.9;
 }

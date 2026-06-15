@@ -37,6 +37,12 @@ public class LevelHistory {
     @Column(nullable = false)
     private Integer sensorStatus;
 
+    @Column(length = 32)
+    private String businessPhase;
+
+    @Column
+    private Boolean noiseLimited;
+
     @Column(nullable = false)
     private LocalDateTime recordTime;
 }

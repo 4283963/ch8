@@ -218,6 +218,8 @@ public class AsyncBatchProcessor {
                         .pumpSpeedPercent(decision.speedPercent())
                         .controlReason(decision.reason())
                         .sensorStatus(e.sensorStatus())
+                        .businessPhase(decision.businessPhase().name())
+                        .noiseLimited(decision.noiseLimited())
                         .recordTime(recordTime)
                         .build());
 
